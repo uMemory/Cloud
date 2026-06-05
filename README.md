@@ -491,6 +491,7 @@ bash scripts/stop_load_simulators.sh scripts/agents.txt
 | 现象 | 原因与处理 |
 |---|---|
 | `docker-compose up -d --build` 卡在 apt 步骤 | 后端 Dockerfile 已切换华为云 Debian 源；确认已拉取最新代码后重新 build |
+| 访问 `/api/health` 返回 502 | Nginx 已启动但后端容器未运行。先执行 `docker-compose logs --tail=120 backend` 查看原因，再执行 `docker-compose restart backend`。当前版本后端启动时会等待 MySQL 就绪并自动重试，首次部署建议拉取最新代码后重新 `docker-compose up -d --build` |
 | 页面没有三台 Agent | 检查 `scripts/agents.txt` 是否是三台 Agent 内网 IP，检查 `cloud-monitor-agent` 是否 active |
 | 需要展示离线节点 | 执行 `docker-compose exec backend python backend/scripts/seed_offline_nodes.py`，不要把演示离线 IP 写入 `scripts/agents.txt` |
 | 点击启动模拟负载失败 | 先确认中心 ECS 到 Agent 已配置免密 SSH，且后端容器已重建并挂载 `/root/.ssh` |

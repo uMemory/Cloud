@@ -1,5 +1,8 @@
+import time
+
 from flask import Flask, jsonify
 from flask_cors import CORS
+from sqlalchemy.exc import OperationalError
 
 from app.api.alerts import bp as alerts_bp
 from app.api.auth import bp as auth_bp
@@ -13,8 +16,21 @@ from app.config import settings
 from app.database import Base, engine
 
 
+def init_database_with_retry(retries: int = 30, delay: float = 2.0) -> None:
+    last_error: Exception | None = None
+    for attempt in range(1, retries + 1):
+        try:
+            Base.metadata.create_all(bind=engine)
+            return
+        except OperationalError as exc:
+            last_error = exc
+            print(f"database not ready, retry {attempt}/{retries}: {exc}", flush=True)
+            time.sleep(delay)
+    raise RuntimeError("database is not available after startup retries") from last_error
+
+
 def create_app() -> Flask:
-    Base.metadata.create_all(bind=engine)
+    init_database_with_retry()
 
     app = Flask(__name__)
     app.config["SECRET_KEY"] = settings.secret_key
