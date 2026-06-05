@@ -1,5 +1,6 @@
 import argparse
 import math
+import multiprocessing
 import os
 import random
 import socket
@@ -9,10 +10,21 @@ import time
 from urllib.request import urlopen
 
 
-def cpu_worker(stop_event: threading.Event, duty_getter) -> None:
+def cpu_worker(
+    stop_event,
+    cpu_min: float,
+    cpu_max: float,
+    phase: float,
+    seed: int,
+) -> None:
+    random.seed(seed)
     period = 0.2
+    started = time.time()
     while not stop_event.is_set():
-        duty = max(0.0, min(0.98, duty_getter()))
+        elapsed = time.time() - started
+        wave = (math.sin(elapsed / 9 + phase) + 1) / 2
+        jitter = random.uniform(-0.04, 0.04)
+        duty = max(0.0, min(0.98, cpu_min + (cpu_max - cpu_min) * wave + jitter))
         busy_until = time.perf_counter() + period * duty
         while time.perf_counter() < busy_until:
             math.sqrt(random.random() * 10000)
@@ -80,18 +92,18 @@ def main() -> None:
     seed = sum(ord(ch) for ch in socket.gethostname())
     random.seed(seed)
     phase = random.random() * math.pi * 2
-    started = time.time()
-    stop_event = threading.Event()
+    stop_event = multiprocessing.Event()
 
-    def duty() -> float:
-        elapsed = time.time() - started
-        wave = (math.sin(elapsed / 9 + phase) + 1) / 2
-        jitter = random.uniform(-0.04, 0.04)
-        return args.cpu_min + (args.cpu_max - args.cpu_min) * wave + jitter
-
+    cpu_processes: list[multiprocessing.Process] = []
     threads: list[threading.Thread] = []
-    for _ in range(max(1, args.workers)):
-        threads.append(threading.Thread(target=cpu_worker, args=(stop_event, duty), daemon=True))
+    for index in range(max(1, args.workers)):
+        cpu_processes.append(
+            multiprocessing.Process(
+                target=cpu_worker,
+                args=(stop_event, args.cpu_min, args.cpu_max, phase + index * 0.75, seed + index + 1),
+                daemon=True,
+            )
+        )
     threads.append(threading.Thread(target=memory_worker, args=(stop_event, args.memory_min_mb, args.memory_max_mb, seed), daemon=True))
     threads.append(threading.Thread(target=disk_worker, args=(stop_event, args.disk_write_mb, args.disk_interval), daemon=True))
     if args.network_url:
@@ -102,6 +114,8 @@ def main() -> None:
         f"cpu={args.cpu_min:.0%}-{args.cpu_max:.0%}, memory={args.memory_min_mb}-{args.memory_max_mb}MB, "
         f"disk={args.disk_write_mb}MB/{args.disk_interval}s, network={args.network_url or 'disabled'}"
     )
+    for process in cpu_processes:
+        process.start()
     for thread in threads:
         thread.start()
 
@@ -110,6 +124,10 @@ def main() -> None:
             time.sleep(60)
     except KeyboardInterrupt:
         stop_event.set()
+        for process in cpu_processes:
+            process.join(timeout=2)
+            if process.is_alive():
+                process.terminate()
         print("load simulator stopped")
 
 

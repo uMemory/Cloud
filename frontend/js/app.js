@@ -874,8 +874,7 @@ function field(f) {
   }
   const fallback = f.name.includes("disk") ? 1000 : 1;
   const value = f.max ? (f.name.includes("limit") ? f.max : Math.round((f.min + f.max) / 3)) : fallback;
-  const maxAttr = f.max ? ` max="${f.max}"` : "";
-  return `<div class="col-md-6"><label class="form-label">${f.label}</label><input class="form-control" name="${f.name}" type="number" min="${f.min}"${maxAttr} step="any" value="${value}"></div>`;
+  return `<div class="col-md-6"><label class="form-label">${f.label}</label><input class="form-control" name="${f.name}" type="number" min="${f.min}" step="any" value="${value}"></div>`;
 }
 
 async function renderHistory() {

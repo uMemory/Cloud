@@ -7,10 +7,23 @@ def ratio(request: float, limit: float) -> float:
     return round(float(request) / float(limit), 4) if limit else 0.0
 
 
+def number(value, default: float = 0.0) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
 def enrich_features(row: dict) -> dict:
     features = dict(row)
-    features["schedule_delay"] = max(0.0, (row.get("scheduled_time") or 0) - (row.get("creation_time") or 0))
-    features["running_duration"] = max(0.0, (row.get("deletion_time") or 0) - (row.get("scheduled_time") or 0))
+    if row.get("scheduled_time") is not None and row.get("creation_time") is not None:
+        features["schedule_delay"] = max(0.0, number(row.get("scheduled_time")) - number(row.get("creation_time")))
+    else:
+        features["schedule_delay"] = max(0.0, number(row.get("schedule_delay")))
+    if row.get("deletion_time") is not None and row.get("scheduled_time") is not None:
+        features["running_duration"] = max(0.0, number(row.get("deletion_time")) - number(row.get("scheduled_time")))
+    else:
+        features["running_duration"] = max(0.0, number(row.get("running_duration")))
     features["cpu_ratio"] = ratio(row.get("cpu_request", 0), row.get("cpu_limit", 0))
     features["gpu_ratio"] = ratio(row.get("gpu_request", 0), row.get("gpu_limit", 0))
     features["rdma_ratio"] = ratio(row.get("rdma_request", 0), row.get("rdma_limit", 0))
@@ -100,17 +113,17 @@ def assess_risk(features: dict) -> RiskResult:
 
 MODEL_FEATURES = [
     {"name": "role", "label": "实例角色", "type": "select", "options": ["HN", "RN"]},
-    {"name": "cpu_request", "label": "CPU 请求", "min": 1, "max": 64, "step": 1},
-    {"name": "cpu_limit", "label": "CPU 上限", "min": 1, "max": 64, "step": 1},
-    {"name": "gpu_request", "label": "GPU 请求", "min": 0, "max": 8, "step": 1},
-    {"name": "gpu_limit", "label": "GPU 上限", "min": 1, "max": 8, "step": 1},
-    {"name": "rdma_request", "label": "RDMA 请求", "min": 0, "max": 100, "step": 1},
-    {"name": "rdma_limit", "label": "RDMA 上限", "min": 1, "max": 100, "step": 1},
-    {"name": "memory_request", "label": "内存请求", "min": 1, "max": 512, "step": 1},
-    {"name": "memory_limit", "label": "内存上限", "min": 1, "max": 512, "step": 1},
+    {"name": "cpu_request", "label": "CPU 请求", "min": 1, "max": 128, "step": 1},
+    {"name": "cpu_limit", "label": "CPU 上限", "min": 1, "max": 128, "step": 1},
+    {"name": "gpu_request", "label": "GPU 请求", "min": 0, "max": 16, "step": 1},
+    {"name": "gpu_limit", "label": "GPU 上限", "min": 1, "max": 16, "step": 1},
+    {"name": "rdma_request", "label": "RDMA 请求", "min": 0, "max": 200, "step": 1},
+    {"name": "rdma_limit", "label": "RDMA 上限", "min": 1, "max": 200, "step": 1},
+    {"name": "memory_request", "label": "内存请求", "min": 1, "max": 1024, "step": 1},
+    {"name": "memory_limit", "label": "内存上限", "min": 1, "max": 1024, "step": 1},
     {"name": "disk_request", "label": "磁盘请求", "min": 0, "step": 1},
     {"name": "disk_limit", "label": "磁盘上限", "min": 1, "step": 1},
-    {"name": "max_instance_per_node", "label": "单节点最大实例数", "min": 1, "max": 16, "step": 1},
-    {"name": "schedule_delay", "label": "调度延迟(秒)", "min": 0, "max": 7200, "step": 1},
-    {"name": "running_duration", "label": "运行时长(秒)", "min": 0, "max": 172800, "step": 1},
+    {"name": "max_instance_per_node", "label": "单节点最大实例数", "min": 1, "max": 64, "step": 1},
+    {"name": "schedule_delay", "label": "调度延迟(秒)", "min": 0, "max": 86400, "step": 1},
+    {"name": "running_duration", "label": "运行时长(秒)", "min": 0, "max": 604800, "step": 1},
 ]
