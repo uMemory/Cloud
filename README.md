@@ -171,7 +171,7 @@ python -m http.server 8080 -d frontend
 http://127.0.0.1:8080/index.html
 ```
 
-## Docker Compose 部署
+## Docker 部署
 
 本项目包含 `docker-compose.yml`，会启动 MySQL、后端 API 和 Nginx 前端代理。
 
@@ -189,7 +189,7 @@ docker compose exec backend python backend/ml/train.py
 访问地址：
 
 ```text
-http://服务器IP/
+http://服务器公网IP/
 ```
 
 API 会由 Nginx 转发：
@@ -234,8 +234,8 @@ API 会由 Nginx 转发：
 以下命令只在中心 ECS 执行：
 
 ```bash
-apt update
-apt install -y docker.io docker-compose git openssh-client sshpass
+sudo apt update
+sudo apt install -y docker.io docker-compose git openssh-client sshpass
 systemctl enable --now docker
 ```
 

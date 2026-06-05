@@ -32,6 +32,7 @@ services:
       SECRET_KEY: cloud-ai-monitor-secret-2026
     volumes:
       - ./backend/ml/models:/app/backend/ml/models
+      - ./data:/app/data:ro
       - ./agent:/app/agent
       - ./scripts:/app/scripts
       - /root/.ssh:/root/.ssh:ro
