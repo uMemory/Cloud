@@ -425,18 +425,20 @@ bash scripts/deploy_load_simulators.sh scripts/agents.txt
 脚本会按 Agent 列表顺序给三台机器下发不同 profile，便于图表产生差异：
 
 ```text
-Profile 1: CPU 0.18-0.56, Memory 96-384 MB, Disk 8 MB / 5 秒
-Profile 2: CPU 0.12-0.46, Memory 128-512 MB, Disk 12 MB / 7 秒
-Profile 3: CPU 0.24-0.68, Memory 160-640 MB, Disk 16 MB / 9 秒
+normal:  正常演示，CPU 约 10%-68%，主要用于展示趋势变化
+warning: 预警演示，CPU 约 60%-88%，通常会触发 CPU 预警
+danger:  高危演示，CPU 约 88%-98%，通常会触发 CPU 高危
 ```
+
+默认网络流量来源为 `http://CENTER_PRIVATE_IP/vendor/echarts/echarts.min.js`，即 Agent 通过内网从中心 Nginx 下载前端静态资源；不会访问外网。
 
 也可以在前端首页点击：
 
 ```text
-启动模拟负载 / 停止模拟负载
+正常模拟 / 预警模拟 / 高危模拟 / 停止模拟负载
 ```
 
-前端按钮调用 `/api/ops/load/start` 和 `/api/ops/load/stop`，后端容器通过挂载的 `/root/.ssh` 执行内网 SSH 控制三台 Agent 的 `cloud-monitor-load` 服务。因为 `docker-compose.yml` 已挂载 `/root/.ssh:/root/.ssh:ro`，只要第 5 步免密 SSH 配置成功，按钮即可工作。
+前端按钮调用 `/api/ops/load/start` 和 `/api/ops/load/stop`。启动接口会传入 `normal`、`warning` 或 `danger` 模式，后端容器再通过挂载的 `/root/.ssh` 执行内网 SSH 控制三台 Agent 的 `cloud-monitor-load` 服务。因为 `docker-compose.yml` 已挂载 `/root/.ssh:/root/.ssh:ro`，只要第 5 步免密 SSH 配置成功，按钮即可工作。
 
 检查模拟负载状态：
 

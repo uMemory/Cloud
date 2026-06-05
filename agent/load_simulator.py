@@ -6,12 +6,13 @@ import socket
 import tempfile
 import threading
 import time
+from urllib.request import urlopen
 
 
 def cpu_worker(stop_event: threading.Event, duty_getter) -> None:
     period = 0.2
     while not stop_event.is_set():
-        duty = max(0.0, min(0.85, duty_getter()))
+        duty = max(0.0, min(0.98, duty_getter()))
         busy_until = time.perf_counter() + period * duty
         while time.perf_counter() < busy_until:
             math.sqrt(random.random() * 10000)
@@ -40,9 +41,25 @@ def disk_worker(stop_event: threading.Event, write_mb: int, interval: float) -> 
         with open(path, "wb") as handle:
             for _ in range(write_mb):
                 handle.write(block)
+            handle.flush()
+            os.fsync(handle.fileno())
+        with open(path, "rb") as handle:
+            while handle.read(1024 * 1024):
+                pass
         try:
             os.remove(path)
         except OSError:
+            pass
+        time.sleep(interval)
+
+
+def network_worker(stop_event: threading.Event, url: str, interval: float) -> None:
+    while not stop_event.is_set():
+        try:
+            with urlopen(url, timeout=5) as response:
+                while response.read(256 * 1024):
+                    pass
+        except Exception:
             pass
         time.sleep(interval)
 
@@ -54,8 +71,10 @@ def main() -> None:
     parser.add_argument("--workers", type=int, default=1, help="CPU worker count")
     parser.add_argument("--memory-min-mb", type=int, default=64)
     parser.add_argument("--memory-max-mb", type=int, default=256)
-    parser.add_argument("--disk-write-mb", type=int, default=6)
-    parser.add_argument("--disk-interval", type=float, default=6.0)
+    parser.add_argument("--disk-write-mb", type=int, default=16)
+    parser.add_argument("--disk-interval", type=float, default=1.5)
+    parser.add_argument("--network-url", default="")
+    parser.add_argument("--network-interval", type=float, default=1.5)
     args = parser.parse_args()
 
     seed = sum(ord(ch) for ch in socket.gethostname())
@@ -75,10 +94,13 @@ def main() -> None:
         threads.append(threading.Thread(target=cpu_worker, args=(stop_event, duty), daemon=True))
     threads.append(threading.Thread(target=memory_worker, args=(stop_event, args.memory_min_mb, args.memory_max_mb, seed), daemon=True))
     threads.append(threading.Thread(target=disk_worker, args=(stop_event, args.disk_write_mb, args.disk_interval), daemon=True))
+    if args.network_url:
+        threads.append(threading.Thread(target=network_worker, args=(stop_event, args.network_url, args.network_interval), daemon=True))
 
     print(
         f"load simulator started on {socket.gethostname()} "
-        f"cpu={args.cpu_min:.0%}-{args.cpu_max:.0%}, memory={args.memory_min_mb}-{args.memory_max_mb}MB"
+        f"cpu={args.cpu_min:.0%}-{args.cpu_max:.0%}, memory={args.memory_min_mb}-{args.memory_max_mb}MB, "
+        f"disk={args.disk_write_mb}MB/{args.disk_interval}s, network={args.network_url or 'disabled'}"
     )
     for thread in threads:
         thread.start()

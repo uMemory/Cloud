@@ -4,7 +4,7 @@ import os
 import subprocess
 from pathlib import Path
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 
 from app.deps import auth_required
 
@@ -14,7 +14,7 @@ ROOT_DIR = Path(os.getenv("PROJECT_ROOT", "/app"))
 AGENTS_FILE = os.getenv("AGENTS_FILE", "scripts/agents.txt")
 
 
-def run_script(script_name: str) -> dict:
+def run_script(script_name: str, extra_env: dict[str, str] | None = None) -> dict:
     script_path = ROOT_DIR / "scripts" / script_name
     agents_path = ROOT_DIR / AGENTS_FILE
     if not script_path.exists():
@@ -24,6 +24,8 @@ def run_script(script_name: str) -> dict:
 
     env = os.environ.copy()
     env.setdefault("SSH_OPTS", "-o BatchMode=yes -o StrictHostKeyChecking=accept-new")
+    if extra_env:
+        env.update(extra_env)
     result = subprocess.run(
         ["bash", str(script_path), str(agents_path)],
         cwd=str(ROOT_DIR),
@@ -44,7 +46,11 @@ def run_script(script_name: str) -> dict:
 @bp.post("/load/start")
 @auth_required
 def start_load():
-    result = run_script("deploy_load_simulators.sh")
+    payload = request.get_json(silent=True) or {}
+    mode = payload.get("mode") or "normal"
+    if mode not in {"normal", "warning", "danger"}:
+        return jsonify({"ok": False, "detail": "模拟模式无效"}), 400
+    result = run_script("deploy_load_simulators.sh", {"LOAD_MODE": mode})
     status = 200 if result["ok"] else 500
     return jsonify(result), status
 

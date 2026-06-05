@@ -67,6 +67,6 @@ const ModelAPI = {
 };
 
 window.OpsAPI = {
-  startLoad: () => apiFetch("/ops/load/start", { method: "POST" }),
+  startLoad: (mode = "normal") => apiFetch("/ops/load/start", { method: "POST", body: JSON.stringify({ mode }) }),
   stopLoad: () => apiFetch("/ops/load/stop", { method: "POST" }),
 };

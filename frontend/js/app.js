@@ -94,7 +94,7 @@ function metricsApi() {
 
 function opsApi() {
   return window.OpsAPI || {
-    startLoad: () => apiFetch("/ops/load/start", { method: "POST" }),
+    startLoad: (mode = "normal") => apiFetch("/ops/load/start", { method: "POST", body: JSON.stringify({ mode }) }),
     stopLoad: () => apiFetch("/ops/load/stop", { method: "POST" }),
   };
 }
@@ -1062,7 +1062,9 @@ async function renderLiveDashboard() {
               <div class="col-lg-auto">
                 <div class="btn-list">
                   <button class="btn" id="btn-refresh-host">立即刷新</button>
-                  <button class="btn" id="btn-start-load" type="button">启动模拟负载</button>
+                  <button class="btn" id="btn-start-load" type="button" data-load-mode="normal">正常模拟</button>
+                  <button class="btn" id="btn-warning-load" type="button" data-load-mode="warning">预警模拟</button>
+                  <button class="btn" id="btn-danger-load" type="button" data-load-mode="danger">高危模拟</button>
                   <button class="btn" id="btn-stop-load" type="button">停止模拟负载</button>
                   <a class="btn" href="#alerts">查看实时告警</a>
                   <a class="btn btn-primary" href="#predict">智能预警</a>
@@ -1166,7 +1168,9 @@ async function renderLiveDashboard() {
   drawClusterCompare(servers);
   document.getElementById("btn-refresh-host")?.addEventListener("click", renderLiveDashboard);
   document.getElementById("btn-refresh-host-secondary")?.addEventListener("click", renderLiveDashboard);
-  document.getElementById("btn-start-load")?.addEventListener("click", () => controlLoadSimulator("start"));
+  document.querySelectorAll("[data-load-mode]").forEach(button => {
+    button.addEventListener("click", () => controlLoadSimulator("start", button.dataset.loadMode || "normal"));
+  });
   document.getElementById("btn-stop-load")?.addEventListener("click", () => controlLoadSimulator("stop"));
   document.getElementById("server-trend-select")?.addEventListener("change", (event) => {
     State.selectedServerId = event.target.value;
@@ -1176,19 +1180,20 @@ async function renderLiveDashboard() {
   State.hostTimer = setInterval(refreshLiveDashboardCharts, 3000);
 }
 
-async function controlLoadSimulator(action) {
-  const startButton = document.getElementById("btn-start-load");
+async function controlLoadSimulator(action, mode = "normal") {
+  const loadButtons = Array.from(document.querySelectorAll("[data-load-mode]"));
   const stopButton = document.getElementById("btn-stop-load");
-  [startButton, stopButton].forEach(button => { if (button) button.disabled = true; });
+  [...loadButtons, stopButton].forEach(button => { if (button) button.disabled = true; });
   try {
-    const result = action === "start" ? await opsApi().startLoad() : await opsApi().stopLoad();
+    const result = action === "start" ? await opsApi().startLoad(mode) : await opsApi().stopLoad();
     if (!result.ok) throw new Error(result.stderr || result.detail || "操作失败");
-    toast(action === "start" ? "已启动三台 Agent 的模拟负载" : "已停止三台 Agent 的模拟负载", "success");
+    const modeLabel = mode === "danger" ? "高危" : mode === "warning" ? "预警" : "正常";
+    toast(action === "start" ? `已启动三台 Agent 的${modeLabel}模拟负载` : "已停止三台 Agent 的模拟负载", "success");
     await refreshLiveDashboardCharts();
   } catch (err) {
     toast(err.message || "模拟负载操作失败", "error");
   } finally {
-    [startButton, stopButton].forEach(button => { if (button) button.disabled = false; });
+    [...loadButtons, stopButton].forEach(button => { if (button) button.disabled = false; });
   }
 }
 
