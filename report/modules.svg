@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="430" font-family="sans-serif" font-size="13">
+  <defs>
+    <marker id="arr-gray" viewBox="0 0 10 7" markerWidth="10" markerHeight="7" refX="8.5" refY="3.5" orient="auto" overflow="visible"><polygon points="0 0,10 3.5,0 7" fill="#6b7280"/></marker>
+  </defs>
+  <text x="450" y="28" text-anchor="middle" font-size="17" font-weight="bold" fill="#111827">图 2 · 功能模块图</text>
+
+  <rect x="45" y="58" width="810" height="48" rx="6" fill="#f3f4f6" stroke="#9ca3af"/>
+  <text x="65" y="88" font-size="13" font-weight="bold" fill="#64748b">表现层 Frontend：Tabler UI + ECharts + 原生 JavaScript</text>
+
+  <rect x="70" y="130" width="125" height="58" rx="6" fill="#dbeafe" stroke="#2563eb" stroke-width="1.4"/>
+  <text x="132" y="153" text-anchor="middle" font-weight="bold" fill="#1e3a8a">登录认证</text>
+  <text x="132" y="172" text-anchor="middle" font-size="11" fill="#1e40af">登录 · 注册</text>
+
+  <rect x="220" y="130" width="125" height="58" rx="6" fill="#dcfce7" stroke="#16a34a" stroke-width="1.4"/>
+  <text x="282" y="153" text-anchor="middle" font-weight="bold" fill="#14532d">实时监控</text>
+  <text x="282" y="172" text-anchor="middle" font-size="11" fill="#15803d">服务器列表</text>
+
+  <rect x="370" y="130" width="125" height="58" rx="6" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.4"/>
+  <text x="432" y="153" text-anchor="middle" font-weight="bold" fill="#92400e">趋势分析</text>
+  <text x="432" y="172" text-anchor="middle" font-size="11" fill="#78350f">ECharts 折线图</text>
+
+  <rect x="520" y="130" width="125" height="58" rx="6" fill="#fee2e2" stroke="#dc2626" stroke-width="1.4"/>
+  <text x="582" y="153" text-anchor="middle" font-weight="bold" fill="#991b1b">告警中心</text>
+  <text x="582" y="172" text-anchor="middle" font-size="11" fill="#991b1b">状态 · 建议</text>
+
+  <rect x="670" y="130" width="125" height="58" rx="6" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.4"/>
+  <text x="732" y="153" text-anchor="middle" font-weight="bold" fill="#4c1d95">智能预警</text>
+  <text x="732" y="172" text-anchor="middle" font-size="11" fill="#5b21b6">模型调用</text>
+
+  <line x1="132" y1="188" x2="132" y2="224" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr-gray)"/>
+  <line x1="282" y1="188" x2="282" y2="224" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr-gray)"/>
+  <line x1="432" y1="188" x2="432" y2="224" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr-gray)"/>
+  <line x1="582" y1="188" x2="582" y2="224" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr-gray)"/>
+  <line x1="732" y1="188" x2="732" y2="224" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr-gray)"/>
+
+  <rect x="45" y="225" width="810" height="48" rx="6" fill="#f3f4f6" stroke="#9ca3af"/>
+  <text x="65" y="255" font-size="13" font-weight="bold" fill="#64748b">服务层 Backend：Flask API + SQLAlchemy + 机器学习模型</text>
+
+  <rect x="85" y="300" width="150" height="54" rx="6" fill="#ede9fe" stroke="#7c3aed"/>
+  <text x="160" y="322" text-anchor="middle" font-weight="bold" fill="#4c1d95">Auth API</text>
+  <text x="160" y="340" text-anchor="middle" font-size="11" fill="#5b21b6">Token 会话</text>
+
+  <rect x="270" y="300" width="150" height="54" rx="6" fill="#dcfce7" stroke="#16a34a"/>
+  <text x="345" y="322" text-anchor="middle" font-weight="bold" fill="#14532d">Metrics API</text>
+  <text x="345" y="340" text-anchor="middle" font-size="11" fill="#15803d">注册 · 上报 · 查询</text>
+
+  <rect x="455" y="300" width="150" height="54" rx="6" fill="#fee2e2" stroke="#dc2626"/>
+  <text x="530" y="322" text-anchor="middle" font-weight="bold" fill="#991b1b">Alert Rules</text>
+  <text x="530" y="340" text-anchor="middle" font-size="11" fill="#991b1b">阈值告警</text>
+
+  <rect x="640" y="300" width="150" height="54" rx="6" fill="#fef9c3" stroke="#ca8a04"/>
+  <text x="715" y="322" text-anchor="middle" font-weight="bold" fill="#92400e">Model API</text>
+  <text x="715" y="340" text-anchor="middle" font-size="11" fill="#78350f">风险预测</text>
+
+  <rect x="120" y="380" width="660" height="34" rx="6" fill="#f8fafc" stroke="#cbd5e1"/>
+  <text x="450" y="402" text-anchor="middle" fill="#334155">数据层：MySQL 保存 users、servers、server_metrics、server_alerts、predictions、ai_instances</text>
+</svg>

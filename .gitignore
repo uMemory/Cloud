@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.pkl
+*.db
+venv/
+.env
+data/*.csv
+!data/disaggregated_DLRM_trace.csv
+.DS_Store
+.claude/
+.idea/
+reference/

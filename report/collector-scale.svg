@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="520" font-family="sans-serif" font-size="13">
+  <defs>
+    <marker id="arr-blue" viewBox="0 0 10 7" markerWidth="10" markerHeight="7" refX="8.5" refY="3.5" orient="auto" overflow="visible">
+      <polygon points="0 0,10 3.5,0 7" fill="#2563eb"/>
+    </marker>
+    <marker id="arr-green" viewBox="0 0 10 7" markerWidth="10" markerHeight="7" refX="8.5" refY="3.5" orient="auto" overflow="visible">
+      <polygon points="0 0,10 3.5,0 7" fill="#16a34a"/>
+    </marker>
+    <marker id="arr-gray" viewBox="0 0 10 7" markerWidth="10" markerHeight="7" refX="8.5" refY="3.5" orient="auto" overflow="visible">
+      <polygon points="0 0,10 3.5,0 7" fill="#6b7280"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="32" text-anchor="middle" font-size="18" font-weight="bold" fill="#111827">图 5 · 大型集群 Collector 分层扩展架构</text>
+
+  <rect x="42" y="70" width="535" height="150" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="8,4"/>
+  <text x="305" y="96" text-anchor="middle" font-weight="bold" fill="#475569">业务 VPC / 可用区 A</text>
+
+  <rect x="72" y="118" width="158" height="42" rx="5" fill="#eef2ff" stroke="#6366f1"/>
+  <text x="151" y="144" text-anchor="middle" font-weight="bold" fill="#3730a3">Agent ECS-1 ... N</text>
+  <rect x="72" y="166" width="158" height="34" rx="5" fill="#eef2ff" stroke="#6366f1"/>
+  <text x="151" y="188" text-anchor="middle" font-size="12" fill="#4338ca">批量节点</text>
+
+  <rect x="330" y="122" width="190" height="72" rx="7" fill="#dcfce7" stroke="#16a34a"/>
+  <text x="425" y="150" text-anchor="middle" font-weight="bold" fill="#14532d">Collector A</text>
+  <text x="425" y="172" text-anchor="middle" font-size="12" fill="#15803d">接收、缓存、压缩、重试</text>
+
+  <line x1="230" y1="139" x2="328" y2="150" stroke="#2563eb" stroke-width="1.4" marker-end="url(#arr-blue)"/>
+  <line x1="230" y1="183" x2="328" y2="170" stroke="#2563eb" stroke-width="1.4" marker-end="url(#arr-blue)"/>
+
+  <rect x="42" y="260" width="535" height="150" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="8,4"/>
+  <text x="305" y="286" text-anchor="middle" font-weight="bold" fill="#475569">业务 VPC / 可用区 B</text>
+
+  <rect x="72" y="308" width="158" height="42" rx="5" fill="#eef2ff" stroke="#6366f1"/>
+  <text x="151" y="334" text-anchor="middle" font-weight="bold" fill="#3730a3">Agent ECS-1 ... N</text>
+  <rect x="72" y="356" width="158" height="34" rx="5" fill="#eef2ff" stroke="#6366f1"/>
+  <text x="151" y="378" text-anchor="middle" font-size="12" fill="#4338ca">批量节点</text>
+
+  <rect x="330" y="312" width="190" height="72" rx="7" fill="#dcfce7" stroke="#16a34a"/>
+  <text x="425" y="340" text-anchor="middle" font-weight="bold" fill="#14532d">Collector B</text>
+  <text x="425" y="362" text-anchor="middle" font-size="12" fill="#15803d">局部聚合、过滤、重试</text>
+
+  <line x1="230" y1="329" x2="328" y2="340" stroke="#2563eb" stroke-width="1.4" marker-end="url(#arr-blue)"/>
+  <line x1="230" y1="373" x2="328" y2="360" stroke="#2563eb" stroke-width="1.4" marker-end="url(#arr-blue)"/>
+
+  <rect x="690" y="72" width="210" height="78" rx="8" fill="#fef9c3" stroke="#ca8a04"/>
+  <text x="795" y="102" text-anchor="middle" font-weight="bold" fill="#92400e">消息队列 / Stream</text>
+  <text x="795" y="126" text-anchor="middle" font-size="12" fill="#78350f">削峰、缓冲、解耦写入</text>
+
+  <rect x="690" y="210" width="210" height="78" rx="8" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="795" y="240" text-anchor="middle" font-weight="bold" fill="#1e3a8a">中心监控平台</text>
+  <text x="795" y="264" text-anchor="middle" font-size="12" fill="#1e40af">API、告警、模型、看板</text>
+
+  <rect x="690" y="348" width="210" height="78" rx="8" fill="#fee2e2" stroke="#dc2626"/>
+  <text x="795" y="378" text-anchor="middle" font-weight="bold" fill="#991b1b">时序 / 分析数据库</text>
+  <text x="795" y="402" text-anchor="middle" font-size="12" fill="#991b1b">Prometheus、ClickHouse 等</text>
+
+  <path d="M520 158 C585 158, 610 111, 688 111" fill="none" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr-green)"/>
+  <path d="M520 348 C615 348, 620 128, 688 128" fill="none" stroke="#16a34a" stroke-width="1.5" marker-end="url(#arr-green)"/>
+
+  <line x1="795" y1="150" x2="795" y2="208" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arr-gray)"/>
+  <line x1="795" y1="288" x2="795" y2="346" stroke="#6b7280" stroke-width="1.4" marker-end="url(#arr-gray)"/>
+
+  <rect x="42" y="448" width="858" height="42" rx="6" fill="#f1f5f9" stroke="#cbd5e1"/>
+  <text x="471" y="468" text-anchor="middle" fill="#334155">小规模场景：Agent 可直接 Push 中心平台；大型集群：Agent 先汇聚到本区域 Collector。</text>
+  <text x="471" y="485" text-anchor="middle" fill="#334155">Collector 再通过队列削峰并写入时序/分析数据库，降低中心 API 和 MySQL 写入压力。</text>
+</svg>

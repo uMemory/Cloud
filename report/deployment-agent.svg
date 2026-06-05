@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="490" font-family="sans-serif" font-size="13">
+  <defs>
+    <marker id="arr-gray" viewBox="0 0 10 7" markerWidth="10" markerHeight="7" refX="8.5" refY="3.5" orient="auto" overflow="visible">
+      <polygon points="0 0,10 3.5,0 7" fill="#6b7280"/>
+    </marker>
+    <marker id="arr-blue" viewBox="0 0 10 7" markerWidth="10" markerHeight="7" refX="8.5" refY="3.5" orient="auto" overflow="visible">
+      <polygon points="0 0,10 3.5,0 7" fill="#2563eb"/>
+    </marker>
+    <marker id="arr-green" viewBox="0 0 10 7" markerWidth="10" markerHeight="7" refX="8.5" refY="3.5" orient="auto" overflow="visible">
+      <polygon points="0 0,10 3.5,0 7" fill="#16a34a"/>
+    </marker>
+  </defs>
+
+  <text x="450" y="28" text-anchor="middle" font-size="17" font-weight="bold" fill="#111827">图 4 · 部署与 Agent 上报流程</text>
+
+  <rect x="44" y="66" width="210" height="332" rx="10" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="8,4"/>
+  <text x="149" y="92" text-anchor="middle" font-weight="bold" fill="#475569">中心 ECS 部署</text>
+  <rect x="72" y="118" width="154" height="42" rx="5" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="149" y="144" text-anchor="middle" font-weight="bold" fill="#1e3a8a">git clone 项目</text>
+  <rect x="72" y="178" width="154" height="42" rx="5" fill="#dcfce7" stroke="#16a34a"/>
+  <text x="149" y="204" text-anchor="middle" font-weight="bold" fill="#14532d">docker compose up</text>
+  <rect x="72" y="238" width="154" height="42" rx="5" fill="#fef9c3" stroke="#ca8a04"/>
+  <text x="149" y="264" text-anchor="middle" font-weight="bold" fill="#92400e">配置 agents.txt</text>
+  <rect x="72" y="298" width="154" height="42" rx="5" fill="#ede9fe" stroke="#7c3aed"/>
+  <text x="149" y="324" text-anchor="middle" font-weight="bold" fill="#4c1d95">deploy_agents.sh</text>
+  <line x1="149" y1="160" x2="149" y2="177" stroke="#6b7280" marker-end="url(#arr-gray)"/>
+  <line x1="149" y1="220" x2="149" y2="237" stroke="#6b7280" marker-end="url(#arr-gray)"/>
+  <line x1="149" y1="280" x2="149" y2="297" stroke="#6b7280" marker-end="url(#arr-gray)"/>
+
+  <rect x="315" y="72" width="225" height="84" rx="8" fill="#eef2ff" stroke="#6366f1"/>
+  <text x="427" y="99" text-anchor="middle" font-weight="bold" fill="#3730a3">Agent ECS-1</text>
+  <text x="427" y="121" text-anchor="middle" font-size="12" fill="#4338ca">采集 CPU / 内存 / 磁盘 / 网络</text>
+  <text x="427" y="140" text-anchor="middle" font-size="12" fill="#4338ca">注册、心跳、周期上报</text>
+
+  <rect x="315" y="200" width="225" height="84" rx="8" fill="#eef2ff" stroke="#6366f1"/>
+  <text x="427" y="227" text-anchor="middle" font-weight="bold" fill="#3730a3">Agent ECS-2</text>
+  <text x="427" y="249" text-anchor="middle" font-size="12" fill="#4338ca">采集 CPU / 内存 / 磁盘 / 网络</text>
+  <text x="427" y="268" text-anchor="middle" font-size="12" fill="#4338ca">注册、心跳、周期上报</text>
+
+  <rect x="315" y="328" width="225" height="84" rx="8" fill="#eef2ff" stroke="#6366f1"/>
+  <text x="427" y="355" text-anchor="middle" font-weight="bold" fill="#3730a3">Agent ECS-3</text>
+  <text x="427" y="377" text-anchor="middle" font-size="12" fill="#4338ca">采集 CPU / 内存 / 磁盘 / 网络</text>
+  <text x="427" y="396" text-anchor="middle" font-size="12" fill="#4338ca">注册、心跳、周期上报</text>
+
+  <path d="M226 319 C265 260, 268 120, 313 114" fill="none" stroke="#2563eb" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#arr-blue)"/>
+  <path d="M226 319 C265 285, 275 242, 313 242" fill="none" stroke="#2563eb" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#arr-blue)"/>
+  <path d="M226 319 C270 340, 280 370, 313 370" fill="none" stroke="#2563eb" stroke-width="1.4" stroke-dasharray="5,3" marker-end="url(#arr-blue)"/>
+  <text x="270" y="296" font-size="11" fill="#1e40af">内网 SSH/SCP 批量分发</text>
+
+  <rect x="650" y="84" width="190" height="72" rx="8" fill="#dcfce7" stroke="#16a34a"/>
+  <text x="745" y="111" text-anchor="middle" font-weight="bold" fill="#14532d">Agent 接入 API</text>
+  <text x="745" y="132" text-anchor="middle" font-size="12" fill="#15803d">/api/agents/register</text>
+  <text x="745" y="149" text-anchor="middle" font-size="12" fill="#15803d">/api/metrics/report</text>
+
+  <rect x="650" y="200" width="190" height="84" rx="8" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="745" y="227" text-anchor="middle" font-weight="bold" fill="#1e3a8a">中心处理服务</text>
+  <text x="745" y="249" text-anchor="middle" font-size="12" fill="#1e40af">阈值判断 / 风险评分</text>
+  <text x="745" y="268" text-anchor="middle" font-size="12" fill="#1e40af">告警生成 / 数据清洗</text>
+
+  <rect x="650" y="328" width="190" height="84" rx="8" fill="#fef9c3" stroke="#ca8a04"/>
+  <text x="745" y="355" text-anchor="middle" font-weight="bold" fill="#92400e">MySQL 持久化与展示</text>
+  <text x="745" y="377" text-anchor="middle" font-size="12" fill="#78350f">servers / server_metrics</text>
+  <text x="745" y="396" text-anchor="middle" font-size="12" fill="#78350f">server_alerts / Dashboard</text>
+
+  <path d="M540 114 C590 114, 600 120, 648 120" fill="none" stroke="#16a34a" stroke-width="1.4" marker-end="url(#arr-green)"/>
+  <path d="M540 242 C590 212, 600 156, 648 138" fill="none" stroke="#16a34a" stroke-width="1.4" marker-end="url(#arr-green)"/>
+  <path d="M540 370 C595 310, 602 172, 648 148" fill="none" stroke="#16a34a" stroke-width="1.4" marker-end="url(#arr-green)"/>
+  <line x1="745" y1="156" x2="745" y2="198" stroke="#6b7280" stroke-width="1.3" marker-end="url(#arr-gray)"/>
+  <line x1="745" y1="284" x2="745" y2="326" stroke="#6b7280" stroke-width="1.3" marker-end="url(#arr-gray)"/>
+
+  <rect x="44" y="442" width="796" height="32" rx="5" fill="#f1f5f9" stroke="#cbd5e1"/>
+  <text x="442" y="463" text-anchor="middle" fill="#334155">每台 Agent 执行相同采集与上报逻辑；中心平台统一接收、判断、入库，并供前端看板查询展示。</text>
+</svg>

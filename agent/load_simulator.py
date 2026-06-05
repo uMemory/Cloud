@@ -1,0 +1,95 @@
+import argparse
+import math
+import os
+import random
+import socket
+import tempfile
+import threading
+import time
+
+
+def cpu_worker(stop_event: threading.Event, duty_getter) -> None:
+    period = 0.2
+    while not stop_event.is_set():
+        duty = max(0.0, min(0.85, duty_getter()))
+        busy_until = time.perf_counter() + period * duty
+        while time.perf_counter() < busy_until:
+            math.sqrt(random.random() * 10000)
+        time.sleep(period * (1 - duty))
+
+
+def memory_worker(stop_event: threading.Event, min_mb: int, max_mb: int, seed: int) -> None:
+    random.seed(seed)
+    chunks: list[bytearray] = []
+    while not stop_event.is_set():
+        target_mb = random.randint(min_mb, max_mb)
+        current_mb = len(chunks) * 8
+        while current_mb < target_mb:
+            chunks.append(bytearray(8 * 1024 * 1024))
+            current_mb += 8
+        while current_mb > target_mb and chunks:
+            chunks.pop()
+            current_mb -= 8
+        time.sleep(8)
+
+
+def disk_worker(stop_event: threading.Event, write_mb: int, interval: float) -> None:
+    path = os.path.join(tempfile.gettempdir(), "cloud-monitor-load.tmp")
+    block = os.urandom(1024 * 1024)
+    while not stop_event.is_set():
+        with open(path, "wb") as handle:
+            for _ in range(write_mb):
+                handle.write(block)
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+        time.sleep(interval)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Generate light, repeatable load for cloud monitor demo.")
+    parser.add_argument("--cpu-min", type=float, default=0.10, help="minimum CPU duty per worker, 0-1")
+    parser.add_argument("--cpu-max", type=float, default=0.45, help="maximum CPU duty per worker, 0-1")
+    parser.add_argument("--workers", type=int, default=1, help="CPU worker count")
+    parser.add_argument("--memory-min-mb", type=int, default=64)
+    parser.add_argument("--memory-max-mb", type=int, default=256)
+    parser.add_argument("--disk-write-mb", type=int, default=6)
+    parser.add_argument("--disk-interval", type=float, default=6.0)
+    args = parser.parse_args()
+
+    seed = sum(ord(ch) for ch in socket.gethostname())
+    random.seed(seed)
+    phase = random.random() * math.pi * 2
+    started = time.time()
+    stop_event = threading.Event()
+
+    def duty() -> float:
+        elapsed = time.time() - started
+        wave = (math.sin(elapsed / 9 + phase) + 1) / 2
+        jitter = random.uniform(-0.04, 0.04)
+        return args.cpu_min + (args.cpu_max - args.cpu_min) * wave + jitter
+
+    threads: list[threading.Thread] = []
+    for _ in range(max(1, args.workers)):
+        threads.append(threading.Thread(target=cpu_worker, args=(stop_event, duty), daemon=True))
+    threads.append(threading.Thread(target=memory_worker, args=(stop_event, args.memory_min_mb, args.memory_max_mb, seed), daemon=True))
+    threads.append(threading.Thread(target=disk_worker, args=(stop_event, args.disk_write_mb, args.disk_interval), daemon=True))
+
+    print(
+        f"load simulator started on {socket.gethostname()} "
+        f"cpu={args.cpu_min:.0%}-{args.cpu_max:.0%}, memory={args.memory_min_mb}-{args.memory_max_mb}MB"
+    )
+    for thread in threads:
+        thread.start()
+
+    try:
+        while True:
+            time.sleep(60)
+    except KeyboardInterrupt:
+        stop_event.set()
+        print("load simulator stopped")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>实验报告 SVG 预览</title>
+  <style>
+    body {
+      margin: 0;
+      background: #f6f8fb;
+      color: #1f2937;
+      font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+    }
+
+    main {
+      width: 1020px;
+      margin: 24px auto;
+    }
+
+    section {
+      margin-bottom: 28px;
+      padding: 18px;
+      background: #ffffff;
+      border: 1px solid #dbe3ef;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    img {
+      display: block;
+      width: 960px;
+      height: auto;
+      background: #ffffff;
+      border: 1px solid #edf2f7;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section>
+      <h2>总体架构图</h2>
+      <img src="./architecture.svg" alt="总体架构图">
+    </section>
+    <section>
+      <h2>功能模块图</h2>
+      <img src="./modules.svg" alt="功能模块图">
+    </section>
+    <section>
+      <h2>数据库 ER 图</h2>
+      <img src="./database-er.svg" alt="数据库 ER 图">
+    </section>
+    <section>
+      <h2>部署与 Agent 接入流程图</h2>
+      <img src="./deployment-agent.svg" alt="部署与 Agent 接入流程图">
+    </section>
+    <section>
+      <h2>大型集群 Collector 分层扩展架构</h2>
+      <img src="./collector-scale.svg" alt="大型集群 Collector 分层扩展架构">
+    </section>
+  </main>
+</body>
+</html>

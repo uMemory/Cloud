@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: ai-monitor-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql@123
+      MYSQL_DATABASE: cloud_ai_monitor
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pmysql@123"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: ai-monitor-api
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: "3306"
+      MYSQL_USER: root
+      MYSQL_PASSWORD: mysql@123
+      MYSQL_DB: cloud_ai_monitor
+      SECRET_KEY: cloud-ai-monitor-secret-2026
+    volumes:
+      - ./backend/ml/models:/app/backend/ml/models
+      - ./agent:/app/agent
+      - ./scripts:/app/scripts
+      - /root/.ssh:/root/.ssh:ro
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:alpine
+    container_name: ai-monitor-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
