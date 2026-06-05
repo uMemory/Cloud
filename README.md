@@ -59,7 +59,7 @@ data/disaggregated_DLRM_trace.csv
 ├── backend/
 │   ├── app/                 # API、模型、数据库、业务服务
 │   ├── ml/                  # 模型训练脚本与模型文件目录
-│   ├── scripts/             # 数据导入脚本
+│   ├── scripts/             # 数据导入、清理和离线节点演示脚本
 │   ├── Dockerfile
 │   └── requirements.txt
 ├── agent/
@@ -261,7 +261,7 @@ docker-compose --version
 
 ```bash
 cd /root
-git clone https://github.com/uMemory/Cloud_Computing_Project.git cloud-ai-monitor
+git clone https://github.com/uMemory/Cloud.git cloud-ai-monitor
 cd /root/cloud-ai-monitor
 docker-compose up -d --build
 ```
@@ -404,6 +404,21 @@ curl http://127.0.0.1/api/metrics/latest -H "Authorization: Bearer $TOKEN"
 
 前端首页应显示三台 Agent ECS，趋势图右上角可以切换不同节点。集群资源对比图会按主机名数字后缀排序，例如 `0001`、`0002`、`0003`。
 
+如需在录屏中展示“部分节点离线”的场景，可额外插入两个不存在的演示节点。它们只写入 MySQL 的 `servers` 表，不要加入 `scripts/agents.txt`，因此不会参与 SSH 分发或采集上报：
+
+```bash
+docker-compose exec backend python backend/scripts/seed_offline_nodes.py
+```
+
+执行后前端会额外看到：
+
+```text
+ecs2-agent1-0004 / 192.168.17.250
+ecs2-agent1-0005 / 192.168.17.251
+```
+
+这两个节点不会真实上报指标，系统会按 `last_seen` 超过 30 秒自动判定为离线，用于展示服务器总数、在线/离线统计、节点心跳和节点列表的异常场景。真实 Agent 仍只配置三台 ECS 的内网 IP。
+
 如果旧数据库曾经出现类似 `a842910007c8 / 172.18.0.3` 的 Docker 容器节点，可清理历史残留：
 
 ```bash
@@ -466,9 +481,10 @@ bash scripts/stop_load_simulators.sh scripts/agents.txt
 5. 浏览器登录系统，展示首页、实例列表、预测页面。
 6. 配置三台 Agent 内网 IP 和免密 SSH。
 7. 批量分发 Agent，刷新页面看到三台服务器在线。
-8. 启动模拟负载，等待 15-30 秒，展示趋势图和集群对比图变化。
-9. 在实时告警页确认、解决、忽略告警，展示状态写入数据库。
-10. 在智能预警页输入或带入实例配置，展示模型预测结果。
+8. 可选执行 `seed_offline_nodes.py`，展示三台在线 Agent 加两个离线演示节点。
+9. 启动模拟负载，等待 15-30 秒，展示趋势图和集群对比图变化。
+10. 在实时告警页确认、解决、忽略告警，展示状态写入数据库。
+11. 在智能预警页输入或带入实例配置，展示模型预测结果。
 
 ### 10. 常见问题
 
@@ -476,6 +492,7 @@ bash scripts/stop_load_simulators.sh scripts/agents.txt
 |---|---|
 | `docker-compose up -d --build` 卡在 apt 步骤 | 后端 Dockerfile 已切换华为云 Debian 源；确认已拉取最新代码后重新 build |
 | 页面没有三台 Agent | 检查 `scripts/agents.txt` 是否是三台 Agent 内网 IP，检查 `cloud-monitor-agent` 是否 active |
+| 需要展示离线节点 | 执行 `docker-compose exec backend python backend/scripts/seed_offline_nodes.py`，不要把演示离线 IP 写入 `scripts/agents.txt` |
 | 点击启动模拟负载失败 | 先确认中心 ECS 到 Agent 已配置免密 SSH，且后端容器已重建并挂载 `/root/.ssh` |
 | 曲线不变化 | 确认 Agent 正在上报；如果 ECS 太空闲，启动模拟负载 |
 | 告警状态不能修改 | 确认代码包含 `PATCH /api/server-alerts/<id>`，浏览器强制刷新前端资源 |
