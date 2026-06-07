@@ -202,7 +202,7 @@ API 会由 Nginx 转发：
 
 ## 云服务器部署
 
-本节按从零录制完整部署视频的顺序编写。建议创建 4 台同一 VPC/安全组内的 Ubuntu ECS：1 台中心平台，3 台 Agent 节点。
+本节按从零完整部署顺序编写。建议创建 4 台同一 VPC/安全组内的 Ubuntu ECS：1 台中心平台，3 台 Agent 节点。
 
 ### 0. 记录 ECS 信息
 
@@ -384,6 +384,14 @@ done
 active
 ```
 
+#### 此部分后面均可忽略，直接进入Web UI中进行测试
+
+
+
+
+
+
+
 ### 7. 验证指标入库和前端展示
 
 登录接口获取 Token：
@@ -404,7 +412,7 @@ curl http://127.0.0.1/api/metrics/latest -H "Authorization: Bearer $TOKEN"
 
 前端首页应显示三台 Agent ECS，趋势图右上角可以切换不同节点。集群资源对比图会按主机名数字后缀排序，例如 `0001`、`0002`、`0003`。
 
-如需在录屏中展示“部分节点离线”的场景，可额外插入两个不存在的演示节点。它们只写入 MySQL 的 `servers` 表，不要加入 `scripts/agents.txt`，因此不会参与 SSH 分发或采集上报：
+为展示“部分节点离线”的场景，可额外插入两个不存在的演示节点。它们只写入 MySQL 的 `servers` 表，不要加入 `scripts/agents.txt`，因此不会参与 SSH 分发或采集上报：
 
 ```bash
 docker-compose exec backend python backend/scripts/seed_offline_nodes.py
@@ -427,7 +435,7 @@ docker-compose exec backend python backend/scripts/cleanup_container_nodes.py
 
 新建 ECS 从零部署时通常不需要执行这一步。
 
-### 8. 启动演示负载模拟器
+### 8. 启动负载模拟器
 
 空闲 ECS 的 CPU、网络和 IO 曲线可能接近直线。为了录制演示视频，可以启动轻量负载模拟器：
 
@@ -470,23 +478,9 @@ done
 bash scripts/stop_load_simulators.sh scripts/agents.txt
 ```
 
-### 9. 录屏建议顺序
 
-推荐按以下顺序录制，逻辑最清晰：
 
-1. 展示 4 台 ECS：1 台中心有公网 IP，3 台 Agent 只有内网 IP。
-2. 中心 ECS 安装 Docker、Git、SSH 工具。
-3. `git clone` 项目并 `docker-compose up -d --build`。
-4. 导入数据集并训练模型。
-5. 浏览器登录系统，展示首页、实例列表、预测页面。
-6. 配置三台 Agent 内网 IP 和免密 SSH。
-7. 批量分发 Agent，刷新页面看到三台服务器在线。
-8. 可选执行 `seed_offline_nodes.py`，展示三台在线 Agent 加两个离线演示节点。
-9. 启动模拟负载，等待 15-30 秒，展示趋势图和集群对比图变化。
-10. 在实时告警页确认、解决、忽略告警，展示状态写入数据库。
-11. 在智能预警页输入或带入实例配置，展示模型预测结果。
-
-### 10. 常见问题
+### 9. 常见问题
 
 | 现象 | 原因与处理 |
 |---|---|
@@ -498,16 +492,6 @@ bash scripts/stop_load_simulators.sh scripts/agents.txt
 | 曲线不变化 | 确认 Agent 正在上报；如果 ECS 太空闲，启动模拟负载 |
 | 告警状态不能修改 | 确认代码包含 `PATCH /api/server-alerts/<id>`，浏览器强制刷新前端资源 |
 | 前端仍报旧 JS 错误 | 浏览器执行 `Ctrl + F5`，或检查 `index.html` 中 JS 版本参数 |
-
-生产环境建议补充：
-
-- 修改 `SECRET_KEY` 和 MySQL 密码。
-- 使用云数据库或独立 MySQL 实例保存数据。
-- 给 Nginx 配置域名和 HTTPS。
-- 使用对象存储或数据盘保存大型 trace 文件和模型文件。
-- 通过安全组限制 MySQL 端口，不对公网开放 3306。
-- Agent 节点通过中心 ECS 内网 IP 的 80 端口访问 Nginx，由 Nginx 转发 `/api` 到后端；公网用户同样通过 80 端口访问前端。
-- 大型 ECS 集群可扩展为分层 Collector、消息队列和时序数据库架构，避免单中心和 MySQL 高频写入成为瓶颈。
 
 ## 主要 API
 
@@ -539,26 +523,3 @@ bash scripts/stop_load_simulators.sh scripts/agents.txt
 ```text
 Authorization: Bearer <access_token>
 ```
-
-## 课程要求符合性自检
-
-| 原始要求 | 当前状态 |
-|---|---|
-| 使用 MySQL、MongoDB 或其他分布式数据库 | 已使用 MySQL 8.0 |
-| 后端提供数据库访问 | 已通过 SQLAlchemy 访问 MySQL |
-| 后端提供登录访问接口 | 已实现注册、登录、会话校验接口 |
-| 后端提供机器学习或深度学习模型访问接口 | 已实现 `/api/model/predict` 和模型训练脚本 |
-| 数据分析与可视化 | 已实现多服务器表格、指标趋势图、告警表格、预测历史和 ECharts 图表 |
-| 服务器运行状态监控与预警 | 已实现实机 CPU、内存、磁盘、网络、IO、Swap 采集入库和风险判断 |
-| 多服务器云平台监控 | 已实现 Agent 注册、指标上报、MySQL 存储、前端多服务器列表和趋势图 |
-| 前端提供登录界面 | 已实现登录、注册、显示密码、记住用户名、退出 |
-| 前端从数据库查询数据并展示表格和图表 | 已实现实例表格、告警表格和 ECharts 图表 |
-| 前端调用模型接口 | 已实现智能预警页面 |
-| 云端部署 | 已提供 Docker Compose、中心 ECS、Agent 分发和演示负载部署步骤，并完成过云端联调 |
-| 使用 Flask 或 Django 开发后端 | 已使用 Flask |
-
-## 当前版本边界
-
-- 课程要求涉及的 MySQL、Flask 后端、登录接口、模型接口、数据表格、图表展示、模型调用和部署说明均已覆盖。
-- 当前演示部署采用单中心平台 + 多 Agent Push 架构，适合课程演示和中小规模 ECS 集群。
-- 大型集群扩展方向：按 VPC/可用区增加 Collector 汇聚节点，引入消息队列削峰，将高频指标迁移到 Prometheus、VictoriaMetrics、InfluxDB、ClickHouse 等时序或分析型数据库。
